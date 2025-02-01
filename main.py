@@ -1,4 +1,4 @@
-# Mikhail 2.0.0
+# Mikhail
 
 autoGenerateConfig = True # Disable this if you don't want for "config.py" to be created if missing
 
@@ -91,42 +91,64 @@ devC="DEVELOPER COMMAND - "
 
 cog = bot.create_group("cog")
 
+async def errorSend(ctx:discord.ApplicationContext, errorCode):
+    await ctx.respond(f"**Error:**\n```\n{errorCode}\n```", ephemeral=True)
+
 async def cogNotFound(ctx:discord.ApplicationContext):
     await ctx.respond(f"{cog} not found.", ephemeral=True)
 
+@cog.command(description=devC+"Lists cogs.")
+async def list(ctx:discord.ApplicationContext):
+    try:
+        cogs = os.listdir("./cogs")
+        if "__pycache__" in cogs:
+            cogs.remove("__pycache__")
+        await ctx.respond(f"```{cogs}```", ephemeral=True)
+    except Exception as errorCode:
+        await errorSend(ctx, errorCode)
+
 @cog.command(description=devC+"Loads cogs.")
 async def load(
-    ctx: discord.ApplicationContext,
-    cog: discord.SlashCommandOptionType.string,
+    ctx:discord.ApplicationContext,
+    cog:discord.SlashCommandOptionType.string,
 ):
-    if f"({cog}.py)" in os.listdir("./cogs"):
-        bot.load_extension(f"cogs.{cog}")
-        await ctx.respond(f"Loaded {cog}.", ephemeral=True)
-    else:
-        await cogNotFound(ctx)
+    try:
+        if f"{cog}.py" in os.listdir("./cogs"):
+            bot.load_extension(f"cogs.{cog}")
+            await ctx.respond(f"Loaded {cog}.", ephemeral=True)
+        else:
+            await cogNotFound(ctx)
+    except Exception as errorCode:
+        await errorSend(ctx, errorCode)
 
 @cog.command(description=devC+"Unloads cogs.")
 async def unload(
-    ctx: discord.ApplicationContext,
-    cog: discord.SlashCommandOptionType.string,
+    ctx:discord.ApplicationContext,
+    cog:discord.SlashCommandOptionType.string,
 ):
-    if f"{cog}.py" in os.listdir("./cogs"):
-        bot.unload_extension(f"cogs.{cog}")
-        await ctx.respond(f"Unloaded {cog}.", ephemeral=True)
-    else:
-        await cogNotFound(ctx)
+    try:
+        if f"{cog}.py" in os.listdir("./cogs"):
+            bot.unload_extension(f"cogs.{cog}")
+            await ctx.respond(f"Unloaded {cog}.", ephemeral=True)
+        else:
+            await cogNotFound(ctx)
+    except Exception as errorCode:
+        await errorSend(ctx, errorCode)
 
 @cog.command(description=devC+"Reloads cogs.")
 async def reload(
-    ctx: discord.ApplicationContext,
-    cog: discord.SlashCommandOptionType.string,
+    ctx:discord.ApplicationContext,
+    cog:discord.SlashCommandOptionType.string,
 ):
-    if f"{cog}.py" in os.listdir("./cogs"):
-        bot.reload_extension(f"cogs.{cog}")
-        bot.load_extension(f"cogs.{cog}")
-        await ctx.respond(f"Reloaded {cog}.", ephemeral=True)
-    else:
-        await cogNotFound(ctx)
+    try:
+        if f"{cog}.py" in os.listdir("./cogs"):
+            bot.reload_extension(f"cogs.{cog}")
+            bot.load_extension(f"cogs.{cog}")
+            await ctx.respond(f"Reloaded {cog}.", ephemeral=True)
+        else:
+            await cogNotFound(ctx)
+    except Exception as errorCode:
+        await errorSend(ctx, errorCode)
 
 print("Running the bot...")
 bot.run(token)
